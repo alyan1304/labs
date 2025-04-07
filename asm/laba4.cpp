@@ -6,16 +6,18 @@
 
 int	main() {
 	double pi;
-	for (int n = 1; n < 10000000; n+=10000) {
+	int last_correct_digits = 0;
+	for (int n = 1; n < 10000000; n+=1000) {
 		double x = 0;
 		int k;
-		double one = 1;
+		int one = 1;
 		int two = 2;
 		int eight = 8;
-		double ten = 10;
+		int ten = 10;
 		int m_one = -1;
 		double difference;
 		int correct_digits;
+
 		
 		_asm {
 			finit
@@ -43,7 +45,7 @@ int	main() {
 				fstp st(0)
 
 				fld1
-				fld ten
+				fild ten
 				fldpi
 				fst pi
 				fld x
@@ -65,10 +67,11 @@ int	main() {
 				
 		}
 		
-		
-		if (correct_digits >=5 && correct_digits % 2 == 1) 
+		int digits_difference = correct_digits - last_correct_digits;
+		if (correct_digits >=5 && correct_digits % 2 == 1 && digits_difference == 1) 
 			std::cout << std::setprecision(18) << n << "\t\t" << x << "\t" << difference << "\t\t" << correct_digits << "\n";
-		
+		last_correct_digits = correct_digits;
+
 	}
 	std::cout << "pi = " << pi;
 }
