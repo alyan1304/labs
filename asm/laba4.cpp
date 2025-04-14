@@ -6,19 +6,20 @@
 
 int	main() {
 	double pi;
-	int last_correct_digits = 0;
-	for (int n = 1; n < 10000000; n+=1000) {
+	int precision = 0;
+	int newPrecision = 1;
+	int one = 1;
+	int two = 2;
+	int eight = 8;
+	int ten = 10;
+	int m_one = -1;
+	int intPI;
+	int intX;
+	unsigned short controlWord, newControlWord;
+	for (int n = 1; n < 1000000; n++) {
 		double x = 0;
 		int k;
-		int one = 1;
-		int two = 2;
-		int eight = 8;
-		int ten = 10;
-		int m_one = -1;
-		double difference;
-		int correct_digits;
-
-		
+	
 		_asm {
 			finit
 			mov ecx, n
@@ -44,33 +45,38 @@ int	main() {
 				fstp x
 				fstp st(0)
 
-				fld1
-				fild ten
 				fldpi
 				fst pi
 				fld x
-				fsub st(1), st(0)
-				fstp st(0)
-				fst difference
-				mov ecx, m_one
+				fild ten
+				mov ecx, newPrecision
 				loop2:
-					inc ecx
-					fmul st(0), st(1)
-					fcom st(2)
-					FSTSW AX
-					SAHF
-					jb loop2
-				mov correct_digits, ecx
-				fstp st(0)
-				fstp st(0)
-				fstp st(0)
+					fmul st(1), st(0)
+					fmul st(2), st(0)
+					loop loop2
 				
+				fnstcw controlWord
+				mov ax, 0F3Fh
+				mov newControlWord, ax
+				fldcw newControlWord
+				fstp ST(0)
+				fistp intX
+				fistp intPI
+				fldcw controlWord
+				
+				mov eax, intPI
+				CMP eax, intX
+				jne _end
+				inc precision
+
+				_end:
 		}
-		
-		int digits_difference = correct_digits - last_correct_digits;
-		if (correct_digits >=5 && correct_digits % 2 == 1 && digits_difference == 1) 
-			std::cout << std::setprecision(18) << n << "\t\t" << x << "\t" << difference << "\t\t" << correct_digits << "\n";
-		last_correct_digits = correct_digits;
+			if (precision == newPrecision) {
+				if (precision >= 5 && precision % 2 == 1) {
+					std::cout << std::setprecision(18) << n << "\t\t" << x << "\t" << "\t\t" << newPrecision << "\n";
+				}
+			++newPrecision;
+			}
 
 	}
 	std::cout << "pi = " << pi;
